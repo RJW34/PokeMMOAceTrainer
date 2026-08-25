@@ -60,8 +60,7 @@ python_version = "3.12"
 strict = true
 packages = ["huntlab"]
 
-# Third-party packages without complete stubs. Our own code stays strict.
+# cv2 and mss ship no usable stubs; numpy's are fine at the 3.12 target.
 [[tool.mypy.overrides]]
-module = ["numpy.*", "cv2.*", "mss.*"]
-follow_imports = "skip"
+module = ["cv2.*", "mss.*"]
 ignore_missing_imports = true

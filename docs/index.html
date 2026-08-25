@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PokeMMOAceTrainer — Progress</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #151b23; --line: #29313d; --ink: #e6edf3;
+    --muted: #90a0b0; --dim: #6b7889;
+    --done: #3fb950; --partial: #d29922; --todo: #6b7889; --blocked: #f85149;
+    --accent: #58a6ff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 40px 24px 80px; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 24px; margin-bottom: 32px; }
+  h1 { font-size: 30px; margin: 0 0 6px; letter-spacing: -.02em; }
+  .sub { color: var(--muted); margin: 0; }
+  .stamp { color: var(--dim); font-size: 13px; margin-top: 12px; }
+  .badge {
+    display: inline-block; padding: 3px 9px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    border: 1px solid currentColor;
+  }
+  .badge.sim { color: var(--accent); }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em;
+       color: var(--muted); margin: 40px 0 14px; font-weight: 600; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+  .tally { display: flex; flex-wrap: wrap; gap: 12px; }
+  .tally .cell { flex: 1 1 150px; padding: 16px 18px; }
+  .tally .n { font-size: 32px; font-weight: 700; line-height: 1; }
+  .tally .k { font-size: 11px; text-transform: uppercase; letter-spacing: .09em;
+              color: var(--muted); margin-top: 6px; }
+  .bar { display: flex; height: 8px; border-radius: 999px; overflow: hidden; margin: 18px 0 0; }
+  .bar span { display: block; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line);
+           vertical-align: top; }
+  th { font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+       color: var(--muted); font-weight: 600; }
+  tr:last-child td { border-bottom: 0; }
+  td.note { color: var(--muted); font-size: 13px; }
+  .scroll { overflow-x: auto; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 5px; font-size: 11px;
+          font-weight: 700; letter-spacing: .05em; white-space: nowrap; }
+  .DONE, .PASS { background: rgba(63,185,80,.15); color: var(--done); }
+  .PARTIAL { background: rgba(210,153,34,.15); color: var(--partial); }
+  .TODO, .UNVERIFIED, .UNKNOWN { background: rgba(107,120,137,.18); color: var(--todo); }
+  .BLOCKED { background: rgba(248,81,73,.15); color: var(--blocked); }
+  ul.queue { list-style: none; margin: 0; padding: 6px 0; }
+  ul.queue li { padding: 8px 18px; display: flex; gap: 11px; align-items: baseline; }
+  ul.queue li + li { border-top: 1px solid var(--line); }
+  .box { color: var(--todo); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .box.on { color: var(--done); }
+  li.on span.t { color: var(--muted); text-decoration: line-through; }
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 1px;
+             background: var(--line); border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+  .metrics div { background: var(--panel); padding: 16px 18px; }
+  .metrics .v { font-size: 24px; font-weight: 700; }
+  .metrics .l { font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+                color: var(--muted); margin-top: 5px; }
+  .sev { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  .sev.high { color: var(--blocked); } .sev.medium { color: var(--partial); }
+  .sev.low { color: var(--todo); }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; }
+  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
+           color: var(--dim); font-size: 13px; }
+  a { color: var(--accent); }
+  .err { padding: 18px; color: var(--blocked); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>PokeMMOAceTrainer</h1>
+    <p class="sub">Replay- and simulator-first Pok&eacute;mon hunting agent research lab.</p>
+    <p class="stamp">
+      <span class="badge sim" id="src">SOURCE: SIMULATOR &amp; REPLAY</span>
+      &nbsp; Generated <span id="stamp">—</span> from <code>PROGRESS.md</code>
+    </p>
+  </header>
+
+  <div id="body"></div>
+
+  <footer>
+    All figures come from deterministic simulators and recorded fixtures.
+    No live-client automation exists in this repository, and none is claimed.
+    Status is parsed directly from <code>PROGRESS.md</code>; regenerate with
+    <code>make dashboard</code>.
+  </footer>
+</div>
+
+<script>
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => (
+  {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pill = s => `<span class="pill ${esc(s)}">${esc(s)}</span>`;
+
+function tally(t, total) {
+  const order = ['DONE', 'PARTIAL', 'TODO', 'BLOCKED'];
+  const cells = order.map(k =>
+    `<div class="cell"><div class="n" style="color:var(--${k.toLowerCase()})">${t[k] || 0}</div>
+     <div class="k">${k}</div></div>`).join('');
+  const bar = order.filter(k => t[k]).map(k =>
+    `<span style="width:${(t[k] / total * 100).toFixed(1)}%;background:var(--${k.toLowerCase()})"></span>`
+  ).join('');
+  return `<div class="panel"><div class="tally">${cells}</div>
+          <div style="padding:0 18px 18px"><div class="bar">${bar}</div></div></div>`;
+}
+
+function table(head, rows) {
+  return `<div class="panel scroll"><table><thead><tr>${
+    head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${
+    rows.join('')}</tbody></table></div>`;
+}
+
+function render(d) {
+  const P = [];
+
+  P.push(`<h2>Release criteria &mdash; ${d.criteria.length} tracked</h2>`);
+  P.push(tally(d.criteria_tally, d.criteria.length));
+
+  P.push('<h2>Definition of success</h2>');
+  P.push(table(['#', 'Criterion', 'Status', 'Evidence / gap'], d.criteria.map(c =>
+    `<tr><td>${esc(c.id)}</td><td>${esc(c.criterion)}</td><td>${pill(c.status)}</td>
+     <td class="note">${esc(c.note)}</td></tr>`)));
+
+  if (d.batch) {
+    const b = d.batch;
+    P.push('<h2>Batch simulation &mdash; source: simulator</h2>');
+    P.push(`<div class="metrics">
+      <div><div class="v">${b.runs}</div><div class="l">Seeded runs</div></div>
+      <div><div class="v">${b.mean_encounters}</div><div class="l">Mean encounters</div></div>
+      <div><div class="v">${b.median_steps}</div><div class="l">Median steps</div></div>
+      <div><div class="v">${(b.shiny_termination_rate * 100).toFixed(1)}%</div>
+           <div class="l">Shiny-terminated</div></div>
+    </div>`);
+  }
+
+  P.push('<h2>Roadmap phase gates</h2>');
+  P.push(table(['Phase', 'Exit gate', 'Status'], d.gates.map(g =>
+    `<tr><td>${esc(g.phase)}</td><td class="note">${esc(g.gate)}</td>
+     <td>${pill(g.status)}</td></tr>`)));
+
+  P.push(`<h2>Implementation queue &mdash; ${d.queue_done}/${d.queue_total}</h2>`);
+  P.push(`<div class="panel"><ul class="queue">${d.queue.map(q =>
+    `<li class="${q.done ? 'on' : ''}"><span class="box ${q.done ? 'on' : ''}">${
+      q.done ? '[x]' : '[ ]'}</span><span class="t">${esc(q.task)}</span></li>`).join('')}</ul></div>`);
+
+  P.push(`<h2>Open defects &mdash; ${d.defects.length}</h2>`);
+  P.push(table(['ID', 'Defect', 'Severity'], d.defects.map(x =>
+    `<tr><td>${esc(x.id)}</td><td>${esc(x.title)}</td>
+     <td class="sev ${esc(x.severity)}">${esc(x.severity)}</td></tr>`)));
+
+  P.push('<h2>Verified baseline</h2>');
+  P.push(table(['Command', 'Result'], d.baseline.map(b =>
+    `<tr><td><code>${esc(b.command)}</code></td><td>${pill(b.status)}
+     <span class="note">${esc(b.result)}</span></td></tr>`)));
+
+  document.getElementById('body').innerHTML = P.join('');
+  document.getElementById('stamp').textContent = d.generated_at || 'unknown';
+}
+
+fetch('./data/progress.json', { cache: 'no-store' })
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(render)
+  .catch(e => {
+    document.getElementById('body').innerHTML =
+      `<div class="panel err">Could not load <code>data/progress.json</code> (${esc(e.message)}).
+       Run <code>make dashboard</code> and commit the result.</div>`;
+  });
+</script>
+</body>
+</html>

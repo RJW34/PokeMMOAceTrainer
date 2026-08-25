@@ -1,0 +1,265 @@
+{
+  "baseline": [
+    {
+      "command": "python -m pip install -e .[dev,overlay]",
+      "result": "PASS",
+      "status": "PASS"
+    },
+    {
+      "command": "python -m huntlab.guards.no_live_control .",
+      "result": "PASS \u2014 guard clean",
+      "status": "PASS"
+    },
+    {
+      "command": "pytest -q",
+      "result": "PASS \u2014 8 passed",
+      "status": "PASS"
+    },
+    {
+      "command": "ruff check .",
+      "result": "PASS (6 findings fixed this session)",
+      "status": "PASS"
+    },
+    {
+      "command": "mypy src",
+      "result": "PASS \u2014 25 files (1 finding fixed this session)",
+      "status": "PASS"
+    },
+    {
+      "command": "huntlab simulate --seed 7 --max-steps 100",
+      "result": "PASS \u2014 100 steps, 14 encounters, 14 targets, deterministic",
+      "status": "PASS"
+    },
+    {
+      "command": "huntlab replay --input fixtures/magikarp_normal_then_shiny.jsonl",
+      "result": "PASS \u2014 9 steps, 2 encounters, shiny_threshold_reached, terminal halt",
+      "status": "PASS"
+    },
+    {
+      "command": "python scripts/run_batch.py --runs 25",
+      "result": "PASS \u2014 mean 32.8 encounters, 20/25 runs terminated on shiny",
+      "status": "PASS"
+    },
+    {
+      "command": "python -m huntlab.overlay.app",
+      "result": "UNVERIFIED \u2014 not yet started or probed",
+      "status": "UNVERIFIED"
+    }
+  ],
+  "batch": {
+    "halt_reasons": {
+      "none": 28,
+      "shiny_threshold_reached": 172
+    },
+    "mean_encounters": 28.57,
+    "median_steps": 153,
+    "runs": 200,
+    "scenario": "magikarp_fishing",
+    "shiny_termination_rate": 0.86,
+    "source": "simulator",
+    "terminal_shiny_runs": 172
+  },
+  "criteria": [
+    {
+      "criterion": "Core loop deterministic under a fixed seed",
+      "id": "1",
+      "note": "test_fixed_seed_is_deterministic",
+      "status": "DONE"
+    },
+    {
+      "criterion": "Every proposal carries reason, confidence, preconditions, postconditions, timeout/recovery",
+      "id": "2",
+      "note": "Fields exist on ActionProposal; most policy branches leave preconditions and expected empty, and there is no timeout field at all",
+      "status": "PARTIAL"
+    },
+    {
+      "criterion": "Unknown or contradictory observations fail closed",
+      "id": "3",
+      "note": "Invariant blocks irreversible proposals from UNKNOWN, but counters still advance on sub-threshold frames \u2014 see defect D1",
+      "status": "PARTIAL"
+    },
+    {
+      "criterion": "Shiny implies alert event, proof request, terminal halt",
+      "id": "4",
+      "note": "Alert and halt work (replay-verified). Proof capture is only prose in expected_postconditions; no artifact is requested or written",
+      "status": "PARTIAL"
+    },
+    {
+      "criterion": "Normal encounters never take the shiny branch in the labeled corpus",
+      "id": "5",
+      "note": "No labeled corpus exists; corpus/ holds only a README",
+      "status": "BLOCKED"
+    },
+    {
+      "criterion": "Scenario behavior data-driven, not copied into scripts",
+      "id": "6",
+      "note": "Thresholds, species, and simulator settings load from the manifest, but branch logic is hard-coded in FishingPolicy, and allowed_sources plus terminal_conditions are parsed by nobody",
+      "status": "PARTIAL"
+    },
+    {
+      "criterion": "All transitions event-sourced and reconstructable",
+      "id": "7",
+      "note": "JsonlEventStore appends observation/belief/proposal/sink events; no reader reconstructs a session from them",
+      "status": "PARTIAL"
+    },
+    {
+      "criterion": "Replays rerun after code changes to detect regressions",
+      "id": "8",
+      "note": "No regression runner, and fixtures carry no expected-transition labels to compare against",
+      "status": "TODO"
+    },
+    {
+      "criterion": "Read-only API emits phase, counts, confidence, rate, resources, halt reason",
+      "id": "9",
+      "note": "Phase, counts, confidence, and halt reason are present. Missing: encounters-per-hour, resource estimates, last-progress age, warnings",
+      "status": "PARTIAL"
+    },
+    {
+      "criterion": "Tests cover the eleven named failure modes",
+      "id": "10",
+      "note": "8 tests. Untested: no-bite loops, missed hooks, non-target encounters, resource exhaustion, low-confidence frames, contradictory frames, duplicate/stale frames, long stalls",
+      "status": "PARTIAL"
+    },
+    {
+      "criterion": "Guard rejects live-control packages and symbols",
+      "id": "11",
+      "note": "Guard passes clean; rejection proven by test_guard_rejects_forbidden_import",
+      "status": "DONE"
+    },
+    {
+      "criterion": "Install, tests, simulation, replay, overlay run from a clean environment",
+      "id": "12",
+      "note": "First four verified above; overlay UNVERIFIED",
+      "status": "PARTIAL"
+    },
+    {
+      "criterion": "Documentation matches actual behavior",
+      "id": "13",
+      "note": "README.md describes an OBS HTML view built on the status endpoint; the served page exists but omits the metrics required by criterion 9",
+      "status": "PARTIAL"
+    }
+  ],
+  "criteria_tally": {
+    "BLOCKED": 1,
+    "DONE": 2,
+    "PARTIAL": 9,
+    "TODO": 1
+  },
+  "defects": [
+    {
+      "id": "D1",
+      "severity": "high",
+      "title": "Sub-threshold observations still increment encounter counters"
+    },
+    {
+      "id": "D2",
+      "severity": "medium",
+      "title": "Contradiction detection is one hard-coded pair"
+    },
+    {
+      "id": "D3",
+      "severity": "medium",
+      "title": "Policy mutates belief state while deciding"
+    },
+    {
+      "id": "D4",
+      "severity": "medium",
+      "title": "Manifest fields parsed by nobody"
+    },
+    {
+      "id": "D5",
+      "severity": "medium",
+      "title": "No proof artifact on the shiny branch"
+    },
+    {
+      "id": "D6",
+      "severity": "low",
+      "title": "Overlay unverified and incomplete"
+    }
+  ],
+  "gates": [
+    {
+      "gate": "Magikarp fixture and simulator tests pass from a clean checkout",
+      "phase": "0 \u2014 Reproducible foundation",
+      "status": "DONE"
+    },
+    {
+      "gate": "Branch and mutation tests demonstrate fail-closed behavior",
+      "phase": "1 \u2014 Reliable Magikarp slice",
+      "status": "PARTIAL"
+    },
+    {
+      "gate": "A new scenario needs only a manifest and fixtures, no control-flow code",
+      "phase": "2 \u2014 General fishing scenario",
+      "status": "TODO"
+    },
+    {
+      "gate": "Thousands of seeded sessions with confidence intervals",
+      "phase": "3 \u2014 General encounter lab",
+      "status": "TODO"
+    },
+    {
+      "gate": "Model changes accepted only on replay-metric improvement",
+      "phase": "4 \u2014 Learning and active evaluation",
+      "status": "TODO"
+    },
+    {
+      "gate": "Viewer can always distinguish simulation, replay, offline, and manual",
+      "phase": "5 \u2014 Devstream integration",
+      "status": "PARTIAL"
+    }
+  ],
+  "generated_at": "2026-08-25T02:00:43Z",
+  "queue": [
+    {
+      "done": true,
+      "task": "1. Validate the current Magikarp simulation and replay tests"
+    },
+    {
+      "done": false,
+      "task": "2. Introduce schema-versioned event serialization (constant exists and is validated on read; no migration path or rejection test)"
+    },
+    {
+      "done": false,
+      "task": "3. Add temporal evidence fusion with configurable thresholds (the reducer keeps a 3-frame window but overwrites belief from the newest frame instead of fusing)"
+    },
+    {
+      "done": false,
+      "task": "4. Add invariant checks for impossible phase/action combinations (4 checks exist; phase-successor legality is unchecked)"
+    },
+    {
+      "done": false,
+      "task": "5. Add a watchdog and bounded recovery budget (step counter and budget exist; no wall-clock timeout, no cancellation token)"
+    },
+    {
+      "done": false,
+      "task": "6. Add a failure-bundle writer"
+    },
+    {
+      "done": false,
+      "task": "7. Add batch simulation with JSON and Markdown reports (JSON only)"
+    },
+    {
+      "done": false,
+      "task": "8. Add replay regression output"
+    },
+    {
+      "done": false,
+      "task": "9. Add read-only overlay HTML and source badge (HTML and badge exist; unverified and missing required fields)"
+    },
+    {
+      "done": false,
+      "task": "10. Strengthen the no-live-control guard and test it against representative forbidden snippets (one snippet tested)"
+    },
+    {
+      "done": false,
+      "task": "11. Add property tests for the three named invariants (hypothesis is a declared dependency but no property test exists)"
+    },
+    {
+      "done": false,
+      "task": "12. Update the roadmap from measured gaps (this document is that update)"
+    }
+  ],
+  "queue_done": 1,
+  "queue_total": 12
+}

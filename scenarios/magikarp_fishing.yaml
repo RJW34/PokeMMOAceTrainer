@@ -1,0 +1,31 @@
+schema_version: 1
+scenario_id: magikarp_fishing
+display_name: Magikarp Fishing Research Slice
+allowed_sources:
+  - simulator
+  - replay
+  - manual_guidance
+  - authorized_offline
+
+target_species:
+  - magikarp
+
+thresholds:
+  phase: 0.80
+  shiny: 0.98
+  target: 0.80
+
+recovery:
+  max_steps_without_progress: 4
+  max_recovery_attempts: 2
+
+simulator:
+  no_bite_rate: 0.35
+  target_rate: 0.90
+  shiny_rate: 0.03
+  ambiguity_rate: 0.05
+  max_encounters: 100
+
+terminal_conditions:
+  - shiny_threshold_reached
+  - recovery_budget_exhausted

@@ -106,9 +106,9 @@ The twelve kickoff tasks from `CLAUDE.md`, in order.
 
 ## Defect register
 
-Ranked by severity. Each needs a regression fixture before it is closed.
+Ranked by severity. Each needs a regression fixture before it is closed. Every item is tracked as a [GitHub issue](https://github.com/RJW34/PokeMMOAceTrainer/issues) and grouped into a roadmap milestone.
 
-### D1 — Sub-threshold observations still increment encounter counters *(high)*
+### D1 — Sub-threshold observations still increment encounter counters *(high)* · [#1](https://github.com/RJW34/PokeMMOAceTrainer/issues/1)
 
 `TemporalReducer.update` keys counting off the **raw observation** rather than the accepted belief,
 so a frame rejected as low-confidence still advances `encounters` and `target_encounters`.
@@ -125,30 +125,30 @@ target_encounters : 1                <- counted anyway
 This contradicts success criterion 3 and corrupts every downstream statistic. Counting must move
 behind the confidence gate, keyed on accepted belief.
 
-### D2 — Contradiction detection is one hard-coded pair *(medium)*
+### D2 — Contradiction detection is one hard-coded pair *(medium)* · [#2](https://github.com/RJW34/PokeMMOAceTrainer/issues/2)
 
 `_check_contradictions` only fires for an exact `BATTLE` to `OVERWORLD` pair sharing an
 `encounter_id`, both above `0.95`. Every other contradictory sequence passes silently. The check
 should be driven by the phase-successor table in `docs/STATE_MACHINE.md`.
 
-### D3 — Policy mutates belief state while deciding *(medium)*
+### D3 — Policy mutates belief state while deciding *(medium)* · [#3](https://github.com/RJW34/PokeMMOAceTrainer/issues/3)
 
 `FishingPolicy.decide` writes `state.phase`, `state.halted`, `state.halt_reason`, and
 `state.recovery_attempts`. A decision layer with side effects cannot be safely re-run against a
 replayed event stream, which blocks criterion 7.
 
-### D4 — Manifest fields parsed by nobody *(medium)*
+### D4 — Manifest fields parsed by nobody *(medium)* · [#4](https://github.com/RJW34/PokeMMOAceTrainer/issues/4)
 
 `allowed_sources` and `terminal_conditions` are declared in `scenarios/magikarp_fishing.yaml` and
 required by `docs/SCENARIO_CONTRACT.md`, but `ScenarioConfig.load` ignores both. A scenario can
 therefore run against a source it explicitly forbids.
 
-### D5 — No proof artifact on the shiny branch *(medium)*
+### D5 — No proof artifact on the shiny branch *(medium)* · [#5](https://github.com/RJW34/PokeMMOAceTrainer/issues/5)
 
 Criterion 4 requires a proof request. The shiny proposal only names proof in a text postcondition;
 nothing captures or references an artifact, so the terminal branch leaves no evidence behind.
 
-### D6 — Overlay omits required telemetry fields *(low)*
+### D6 — Overlay omits required telemetry fields *(low)* · [#6](https://github.com/RJW34/PokeMMOAceTrainer/issues/6)
 
 The server was probed and both endpoints answer `200`, so the transport works. The payload does not:
 it lacks the encounters-per-hour, resource-estimate, last-progress-age, and warning fields required

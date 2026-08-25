@@ -1,8 +1,22 @@
 # Pokémon Hunt Agent Lab
 
+[![ci](https://github.com/RJW34/PokeMMOAceTrainer/actions/workflows/ci.yml/badge.svg)](https://github.com/RJW34/PokeMMOAceTrainer/actions/workflows/ci.yml)
+[![progress dashboard](https://img.shields.io/badge/progress-dashboard-58a6ff)](https://rjw34.github.io/PokeMMOAceTrainer/)
+[![python](https://img.shields.io/badge/python-3.11%2B-3776ab)](pyproject.toml)
+
 A production-oriented research scaffold for building, evaluating, and streaming a resilient Pokémon hunting agent **without unattended control of a live online game service**.
 
 The repository separates perception, belief-state estimation, planning, action proposals, telemetry, simulation, replay evaluation, and presentation. The supplied action boundary supports simulators, replay traces, and a manual guidance console. It intentionally contains no live keyboard/mouse driver, process injection, packet manipulation, memory reader, anti-detection logic, or unattended PokeMMO control.
+
+## Progress
+
+`PROGRESS.md` is the single source of truth for what is built and verified. The
+[live dashboard](https://rjw34.github.io/PokeMMOAceTrainer/) renders it, and is derived from that
+file by `make dashboard` so the two cannot drift.
+
+Current state: **3 of 13 release criteria DONE**, 8 partial, 1 todo, 1 blocked; 6 open defects.
+Every figure on the dashboard comes from a deterministic simulator or a recorded fixture, labeled by
+source. No live-client validation is performed or claimed.
 
 ## Why this architecture
 

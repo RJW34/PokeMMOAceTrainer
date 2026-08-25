@@ -26,7 +26,7 @@ Environment: Windows 11, CPython 3.12.10, local `.venv`, editable install.
 | `huntlab simulate --seed 7 --max-steps 100` | PASS — 100 steps, 14 encounters, 14 targets, deterministic |
 | `huntlab replay --input fixtures/magikarp_normal_then_shiny.jsonl` | PASS — 9 steps, 2 encounters, `shiny_threshold_reached`, terminal halt |
 | `python scripts/run_batch.py --runs 25` | PASS — mean 32.8 encounters, 20/25 runs terminated on shiny |
-| `python -m huntlab.overlay.app` | UNVERIFIED — not yet started or probed |
+| `python -m huntlab.overlay.app` | PASS — `/status` 200 with live JSON, `/` 200 serving 1998 bytes of HTML |
 
 The scaffold's own `docs/WORK_LOG.md` recorded `ruff` and `mypy` as unrunnable in its packaging
 environment. Both were run here for the first time, both failed, and both are now clean.
@@ -50,10 +50,10 @@ The thirteen release-candidate criteria from `CLAUDE.md`.
 | 9 | Read-only API emits phase, counts, confidence, rate, resources, halt reason | `PARTIAL` | Phase, counts, confidence, and halt reason are present. **Missing: encounters-per-hour, resource estimates, last-progress age, warnings** |
 | 10 | Tests cover the eleven named failure modes | `PARTIAL` | 8 tests. Untested: no-bite loops, missed hooks, non-target encounters, resource exhaustion, low-confidence frames, contradictory frames, duplicate/stale frames, long stalls |
 | 11 | Guard rejects live-control packages and symbols | `DONE` | Guard passes clean; rejection proven by `test_guard_rejects_forbidden_import` |
-| 12 | Install, tests, simulation, replay, overlay run from a clean environment | `PARTIAL` | First four verified above; overlay `UNVERIFIED` |
+| 12 | Install, tests, simulation, replay, overlay run from a clean environment | `DONE` | All five verified above, including a live probe of both overlay endpoints |
 | 13 | Documentation matches actual behavior | `PARTIAL` | `README.md` describes an OBS HTML view built on the status endpoint; the served page exists but omits the metrics required by criterion 9 |
 
-**Score: 2 DONE · 9 PARTIAL · 1 TODO · 1 BLOCKED**
+**Score: 3 DONE · 8 PARTIAL · 1 TODO · 1 BLOCKED**
 
 ---
 
@@ -84,7 +84,7 @@ The twelve kickoff tasks from `CLAUDE.md`, in order.
 - [ ] 6. Add a failure-bundle writer
 - [ ] 7. Add batch simulation with JSON **and Markdown** reports *(JSON only)*
 - [ ] 8. Add replay regression output
-- [ ] 9. Add read-only overlay HTML and source badge *(HTML and badge exist; unverified and missing required fields)*
+- [ ] 9. Add read-only overlay HTML and source badge *(HTML and badge exist and were probed live; still missing the required telemetry fields)*
 - [ ] 10. Strengthen the no-live-control guard and test it against representative forbidden snippets *(one snippet tested)*
 - [ ] 11. Add property tests for the three named invariants *(`hypothesis` is a declared dependency but **no property test exists**)*
 - [ ] 12. Update the roadmap from measured gaps *(this document is that update)*
@@ -148,10 +148,11 @@ therefore run against a source it explicitly forbids.
 Criterion 4 requires a proof request. The shiny proposal only names proof in a text postcondition;
 nothing captures or references an artifact, so the terminal branch leaves no evidence behind.
 
-### D6 — Overlay unverified and incomplete *(low)*
+### D6 — Overlay omits required telemetry fields *(low)*
 
-Never started in this environment, and the served page lacks the rate, resource, progress-age, and
-warning fields required by criterion 9.
+The server was probed and both endpoints answer `200`, so the transport works. The payload does not:
+it lacks the encounters-per-hour, resource-estimate, last-progress-age, and warning fields required
+by criterion 9, which is why criterion 9 remains `PARTIAL` while criterion 12 is `DONE`.
 
 ---
 

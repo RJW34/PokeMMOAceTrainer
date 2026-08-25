@@ -42,8 +42,8 @@
     },
     {
       "command": "python -m huntlab.overlay.app",
-      "result": "UNVERIFIED \u2014 not yet started or probed",
-      "status": "UNVERIFIED"
+      "result": "PASS \u2014 /status 200 with live JSON, / 200 serving 1998 bytes of HTML",
+      "status": "PASS"
     }
   ],
   "batch": {
@@ -129,8 +129,8 @@
     {
       "criterion": "Install, tests, simulation, replay, overlay run from a clean environment",
       "id": "12",
-      "note": "First four verified above; overlay UNVERIFIED",
-      "status": "PARTIAL"
+      "note": "All five verified above, including a live probe of both overlay endpoints",
+      "status": "DONE"
     },
     {
       "criterion": "Documentation matches actual behavior",
@@ -141,8 +141,8 @@
   ],
   "criteria_tally": {
     "BLOCKED": 1,
-    "DONE": 2,
-    "PARTIAL": 9,
+    "DONE": 3,
+    "PARTIAL": 8,
     "TODO": 1
   },
   "defects": [
@@ -174,7 +174,7 @@
     {
       "id": "D6",
       "severity": "low",
-      "title": "Overlay unverified and incomplete"
+      "title": "Overlay omits required telemetry fields"
     }
   ],
   "gates": [
@@ -209,7 +209,7 @@
       "status": "PARTIAL"
     }
   ],
-  "generated_at": "2026-08-25T02:00:43Z",
+  "generated_at": "2026-08-25T02:03:21Z",
   "queue": [
     {
       "done": true,
@@ -245,7 +245,7 @@
     },
     {
       "done": false,
-      "task": "9. Add read-only overlay HTML and source badge (HTML and badge exist; unverified and missing required fields)"
+      "task": "9. Add read-only overlay HTML and source badge (HTML and badge exist and were probed live; still missing the required telemetry fields)"
     },
     {
       "done": false,

@@ -7,7 +7,7 @@ name = "pokemon-hunt-agent-lab"
 version = "0.1.0"
 description = "Replay- and simulator-first Pokémon hunting agent research scaffold"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
   "PyYAML>=6.0",
 ]
@@ -30,6 +30,12 @@ vision = [
   "opencv-python-headless>=4.10",
   "Pillow>=10.0",
 ]
+capture = [
+  "mss>=9.0",
+  "numpy>=1.26",
+  "opencv-python-headless>=4.10",
+  "Pillow>=10.0",
+]
 
 [project.scripts]
 huntlab = "huntlab.cli:main"
@@ -43,13 +49,19 @@ addopts = "-q"
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
 ignore = ["E501"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 strict = true
 packages = ["huntlab"]
+
+# Third-party packages without complete stubs. Our own code stays strict.
+[[tool.mypy.overrides]]
+module = ["numpy.*", "cv2.*", "mss.*"]
+follow_imports = "skip"
+ignore_missing_imports = true

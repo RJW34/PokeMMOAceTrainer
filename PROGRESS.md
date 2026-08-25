@@ -156,10 +156,43 @@ by criterion 9, which is why criterion 9 remains `PARTIAL` while criterion 12 is
 
 ---
 
+## Finding: the live client obfuscates its window title after login
+
+Observed directly on 2026-08-24 on this machine, PokeMMO client revision 32920.
+
+At the server-select screen the window title is Latin `PokeMMO`. After login it becomes
+`РokеММO`, which renders identically but is a homoglyph substitution:
+
+| Char | Codepoint | Script |
+| --- | --- | --- |
+| `Р` | U+0420 | Cyrillic capital ER |
+| `o` `k` | U+006F U+006B | Latin |
+| `е` | U+0435 | Cyrillic small IE |
+| `М` `М` | U+041C x2 | Cyrillic capital EM |
+| `O` | U+004F | Latin |
+
+Exactly the confusable letters are swapped and the non-confusable ones (`o`, `k`) are left
+Latin. That is not corruption; it is a targeted measure that breaks title-based window lookup
+while remaining invisible to the player.
+
+**Consequence for this project.** The live read-only observer is discontinued. Defeating the
+substitution -- by normalising homoglyphs, matching on process handle, or capturing the full
+screen to sidestep the lookup -- would be circumventing an anti-automation control the operator
+added deliberately. `CLAUDE.md` prohibits anti-detection logic and the capability guard enforces
+it, so no such workaround belongs in this repository.
+
+Nothing else is invalidated. The capture stack, both shiny evidence channels, the adjudicator,
+the alert sink, and the engine are target-agnostic: they consume frames and know nothing about
+where the frames came from. An offline emulator adapter supplies those frames without any
+countermeasure to defeat, and is the path where full automation is in scope.
+
+---
+
 ## Next task
 
-**Fix D1**, with a regression test for the sub-threshold battle frame and a fixture covering
-low-confidence and contradictory frames. It is the highest-leverage item: it is a correctness bug in
+Choose a frame source that does not require defeating a countermeasure (see the finding
+above), then **fix D1**, with a regression test for the sub-threshold battle frame and a
+fixture covering low-confidence and contradictory frames. It is the highest-leverage item: it is a correctness bug in
 the fail-closed guarantee, it silently corrupts the statistics every later phase is measured by, and
 it blocks the Phase 1 gate.
 
